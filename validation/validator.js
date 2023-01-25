@@ -17,6 +17,7 @@ module.exports = new class Validator{
         return [
             check('type','type cannt be empty').not().isEmpty(),
             check('amount','amount cannot be empty').not().isEmpty(),
+            check('deal','deal cannot be empty').not().isEmpty(),
             check('group','group cannt be empty').not().isEmpty(),
             check('date','date cannt be empty').not().isEmpty()
         ]

@@ -9,6 +9,11 @@ const mongoose = require('mongoose');
         type: Number,
         required: true
     },
+    deal: {
+        type: String,
+        required: true,
+        enum: ['cash', 'credit']
+    },
     group: {
         type: String,
         required: true

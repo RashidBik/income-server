@@ -2,7 +2,6 @@ const User = require('../model/income');
 const { default: mongoose } = require('mongoose');
 const {validationResult} = require('express-validator');
 
-
 module.exports = new class Contents_Controller {
     constructor(props) {
         
@@ -17,11 +16,22 @@ module.exports = new class Contents_Controller {
         if (!user) {
            return res.status(404).json('not found such user')
         }
-        res.status(200).json({content: user.contents})
+
+        let expens = 0;
+        let income = 0;
+        user.contents.map(content => {
+            if(content.type == 'expens'){
+               expens += content.amount
+            }
+            if(content.type == 'income'){
+                income += content.amount
+             }
+        })
+        res.status(200).json({content: user.contents, assets: {expens, income}})
     }
 
     async getOneContent (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.content);
+        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
         if (!isValid) {
             return res.json('wrong userid or content id')
         }
@@ -30,34 +40,55 @@ module.exports = new class Contents_Controller {
         if (!user) {
             return res.status(404).json('not found such user')
          }
-        const content = user.contents.find({_id: req.params.contentid});
+        const content = await user.contents.find(item => item._id == req.params.contentid);
         if (!content) {
            return res.status(404).json('not found')
         }
         res.status(200).json({content})
     }
 
-    async createContent (req,  res){
-        // const isValid = mongoose.isValidObjectId(req.params.userid || req.params.content);
-        // if (!isValid) {
-        //     return res.json('wrong userid or content id')
-        // }
+    async getContentGroup (req,  res){
+        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
+        if (!isValid) {
+            return res.json('wrong userid or content id')
+        }
 
-        // const err = validationResult(req);
-        // if(!err.isEmpty()){
-        //     return res.status('403').json({data: null, msg: err.array()})
-        // }
-        // const { type, amount, group, report, date } = req.body;
-        // const user = await User.findById(req.params.userid);
-        // if (!user) {
-        //     return res.status(404).json('not found such user')
-        //  }
-        // user.contents.push({ type, amount, group, report, date })
-        // await user.save(function (err) {
-        //     if (!err) console.log('Success!');
-        //   });
-        res.status(200).json({msg: req.body})
-        console.log(req.body);
+        const user = await User.findById(req.params.userid);
+        if (!user) {
+            return res.status(404).json('not found such user')
+         }
+         let groups = [];
+        await user.contents.map(group => {
+           if(group.group == req.params.group){
+            groups.push(group)
+           }
+        });
+        if (!groups) {
+           return res.status(404).json('not found')
+        }
+        res.status(200).json({groups})
+    }
+
+    async createContent (req,  res){
+        const err = validationResult(req);
+        if(!err.isEmpty()){
+            return res.status(403).json({data: null, msg: err.array()})
+        }
+        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.content);
+        if (!isValid) {
+            return res.json('wrong userid or content id')
+        }
+
+        const { type, amount, deal, group, report, date } = req.body;
+        const user = await User.findById(req.params.userid);
+        if (!user) {
+            return res.status(404).json('not found such user')
+         }
+        user.contents.push({ type, amount, deal, group, report, date })
+        await user.save(function (err) {
+            if (!err) console.log('Success!');
+          });
+        res.status(200).json(user)
     }
 
     async updateContent (req,  res){
@@ -70,7 +101,7 @@ module.exports = new class Contents_Controller {
         if(!err.isEmpty()){
             return res.status('403').json({data: null, msg: err.array()})
         }
-        const { type, amount, group, report, date } = req.body;
+        const { type, amount, deal, group, report, date } = req.body;
         const user = await User.findById(req.params.userid);
         if (!user) {
             return res.status(404).json('not found such user')
@@ -81,6 +112,7 @@ module.exports = new class Contents_Controller {
          }
             content.type = type
             content.amount = amount
+            content.deal = deal
             content.group = group
             content.report = report
             content.date = date

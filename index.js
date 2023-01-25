@@ -2,6 +2,7 @@ const express = require('express');
 const contentRouter = require('./routes/content');
 const userRouter = require('./routes/user');
 const config = require('./config');
+const cors = require('cors');
 // const config = require('config');
 
 const mongoose = require('mongoose');
@@ -13,14 +14,13 @@ mongoose.connect(config[1])
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
-app.use((req, res, next)=>{
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    next();
-})
-app.post("/api/user/content/:id",(req, res, next)=>{
-    console.log(req.body);
-})
+app.use(cors());
+
+// app.use((req, res, next)=>{
+//     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+//     next();
+// })
+
 app.use('/api/user', userRouter);
 app.use('/api/user/content', contentRouter);
 
