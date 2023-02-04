@@ -1,10 +1,26 @@
 const User = require('../model/income');
 const {validationResult} = require('express-validator');
 const { default: mongoose } = require('mongoose');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 module.exports = new class UserController {
-    constructor(props) {
+    constructor() {
         
+    }
+    async login(req, res){
+        const {email, password} = req.body;
+        const user = await User.findById(req.params.userid);
+        if (!user) {
+            return res.status(404).json('not found such user')
+         }
+
+         bcrypt.compare(password, user.password, async function(err, result) {
+          if (!err) {
+            const token = jwt.sign({ id: user._id, user: user.name }, 'ACCESS_KEY');
+            res.json(token)
+          }
+        });
     }
 
     async getOneUser (req,  res){
@@ -23,15 +39,20 @@ module.exports = new class UserController {
     async createUser (req,  res){
         const err = validationResult(req);
         if(!err.isEmpty()){
-            return res.status('403').json({data: null, msg: err.array()})
+            return res.status(403).json({data: null, msg: err.array()})
         }
         const {name, job, email, password} = req.body;
-        const user = new User({name, job, email, password});
-        if (!user) {
-            return res.status(404).json('not found such user')
-         }
-        await user.save();
-        await res.status(200).json({data: user});
+        
+        bcrypt.hash(password, 10, async function(err, hash) {
+            if (!err) {
+                const user = await new User({name, job, email, password: hash});
+                user.save(()=> console.log('sucessfuly created'));
+                res.status(200).json({data: user._id});
+            } else return res.json(err)
+        });
+
+      
+      
     }
 
     async updateUser (req,  res){
@@ -41,7 +62,7 @@ module.exports = new class UserController {
         }
         const err = validationResult(req);
         if(!err.isEmpty()){
-            return res.status('403').json({data: null, msg: err.array()})
+            return res.status(403).json({data: null, msg: err.array()})
         }
         const {name, job, email, password} = req.body;
         const user = await User.findByIdAndUpdate({_id: req.params.userid},{name, job, email, password});

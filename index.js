@@ -4,6 +4,7 @@ const userRouter = require('./routes/user');
 const config = require('./config');
 const cors = require('cors');
 // const config = require('config');
+const jwt = require('jsonwebtoken');
 
 const mongoose = require('mongoose');
 // const { config } = require('dotenv');

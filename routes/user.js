@@ -2,12 +2,14 @@
 const express = require('express');
 const validator = require('../validation/validator');
 const router = express.Router();
+const validateToken = require('../middleware/Auth');
 
 const userController = require('../controller/userController');
 
+router.post('/login/:userid', userController.login);
 router.get('/:userid', userController.getOneUser);
 router.post('/',validator.userValidator() ,userController.createUser);
-router.put('/:userid',validator.userValidator(), userController.updateUser);
-router.delete('/:userid',userController.deleteUser);
+router.put('/:userid',validator.userValidator(), validateToken, userController.updateUser);
+router.delete('/:userid',validateToken, userController.deleteUser);
 
 module.exports = router

@@ -1,7 +1,7 @@
 const {check} = require('express-validator');
 
 module.exports = new class Validator{
-    constructor(props) {
+    constructor() {
     
     }
 
@@ -9,7 +9,7 @@ module.exports = new class Validator{
         return [
             check('name','name cannt be empty').not().isEmpty(),
             check('job','job cannot be empty').not().isEmpty(),
-            check('email','your email is not valid').not().isEmail(),
+            check('email','your email is not valid').isEmail(),
             check('password','password cannt be empty').not().isEmpty()
         ]
     }
