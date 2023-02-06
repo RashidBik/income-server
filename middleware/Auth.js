@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const validateToken = (req, res , next) => {
     const accessToken = req.headers.accesstoken
+    
     if (accessToken) {
        try {
         jwt.verify(accessToken, 'ACCESS_KEY',(err, user)=>{
@@ -16,8 +17,7 @@ const validateToken = (req, res , next) => {
         }
     
     } else {
-        console.log(accessToken, 'not');
-        // return res.json('user not logged in')
+        return res.json('user not logged in')
     }
 }
 

@@ -5,16 +5,16 @@ const router = express.Router();
 const controller = require('../controller/contentController');
 const validateToken = require('../middleware/Auth');
 
-router.get('/:userid', controller.getAllContents);
+router.get('/', validateToken, controller.getAllContents);
 
-router.get('/:userid/:contentid', controller.getOneContent);
+router.get('/:contentid',validateToken, controller.getOneContent);
 
-router.get('/:userid/group/:group', controller.getContentGroup);
+router.get('/group/:group',validateToken, controller.getContentGroup);
 
 router.post('/', validator.contentValidator(), validateToken ,controller.createContent);
 
-router.put('/:userid/:contentid',validator.contentValidator(),controller.updateContent);
+router.put('/:contentid',validator.contentValidator(),validateToken, controller.updateContent);
 
-router.delete('/:userid/:contentid',controller.deleteContent);
+router.delete('/:contentid',validateToken, controller.deleteContent);
 
 module.exports = router;

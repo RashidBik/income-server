@@ -3,16 +3,17 @@ const { default: mongoose } = require('mongoose');
 const {validationResult} = require('express-validator');
 
 module.exports = new class Contents_Controller {
-    constructor(props) {
+    constructor() {
         
     }
 
     async getAllContents (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
-        if (!isValid) {
-            return res.json('wrong userid or content id')
-        }
-        const user = await User.findById(req.params.userid)
+        // const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
+        // if (!isValid) {
+        //     return res.json('wrong userid or content id')
+        // }
+   
+        const user = await User.findById({_id: req.user.id})
         if (!user) {
            return res.status(404).json('not found such user')
         }
@@ -31,12 +32,8 @@ module.exports = new class Contents_Controller {
     }
 
     async getOneContent (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
-        if (!isValid) {
-            return res.status(403).json('wrong userid or content id')
-        }
 
-        const user = await User.findById(req.params.userid);
+        const user = await User.findById({_id: req.user.id});
         if (!user) {
             return res.status(404).json('not found such user')
          }
@@ -48,12 +45,12 @@ module.exports = new class Contents_Controller {
     }
 
     async getContentGroup (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
-        if (!isValid) {
-            return res.json('wrong userid or content id')
-        }
+        // const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
+        // if (!isValid) {
+        //     return res.json('wrong userid or content id')
+        // }
 
-        const user = await User.findById(req.params.userid);
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json('not found such user')
          }
@@ -80,7 +77,7 @@ module.exports = new class Contents_Controller {
         //     return res.json('wrong userid or content id')
         // }
         const { type, amount, deal, group, report, date } = req.body;
-        const user = await User.findOne({email: req.user.email});
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json('not found such user');
          }
@@ -93,18 +90,18 @@ module.exports = new class Contents_Controller {
     }
 
     async updateContent (req,  res){
-        console.log(req.body);
-        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
-        if (!isValid) {
-            return res.json('wrong userid or content id')
-        }
+        // const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
+        // if (!isValid) {
+        //     return res.json('wrong userid or content id')
+        // }
+        // console.log(req.body);
 
         const err =  validationResult(req);
         if(!err.isEmpty()){
-            return await res.status(403).json({data: null, msg: err.array()})
+            return await res.status(403).json(err.array())
         }
         const { type, amount, deal, group, report, date } = req.body;
-        const user = await User.findById(req.params.userid);
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json('not found such user')
          }
@@ -123,17 +120,17 @@ module.exports = new class Contents_Controller {
             if (!err) console.log('Success!');
           });
    
-        await res.status(200).json({msg: "updated successfully"})
+        await res.status(200).json("updated successfully")
 
     }
 
     async deleteContent (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
-        if (!isValid) {
-            return res.json('wrong userid or content id')
-        }
+        // const isValid = mongoose.isValidObjectId(req.params.userid || req.params.contentid);
+        // if (!isValid) {
+        //     return res.json('wrong userid or content id')
+        // }
         
-        const user = await User.findById(req.params.userid);
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json('not found such user')
          }

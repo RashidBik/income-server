@@ -9,23 +9,23 @@ module.exports = new class UserController {
 
     async login(req, res){
         const {email, password} = req.body;
-        const user = await User.find({email: email });
+        const user = await User.findOne({email: email, password: password });
+        console.log(user);
         if (!user) {
             return res.status(404).json('not found such user')
         } else {
-             console.log(user[0]);
-             const token = jwt.sign({ user: user._id, email: user[0].email }, 'ACCESS_KEY');
+             const token = jwt.sign({ id: user._id, email: user.email }, 'ACCESS_KEY');
              await res.json({token})
          }
     }
 
     async getOneUser (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid);
-        if (!isValid) {
-            return res.json('wrong userid')
-        }
+        // const isValid = mongoose.isValidObjectId(req.params.userid);
+        // if (!isValid) {
+        //     return res.json('wrong userid')
+        // }
 
-        const user = await User.findById(req.params.userid);
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json('not found such user')
          }
@@ -48,16 +48,16 @@ module.exports = new class UserController {
     }
 
     async updateUser (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid);
-        if (!isValid) {
-            return res.json('wrong userid')
-        }
+        // const isValid = mongoose.isValidObjectId(req.params.userid);
+        // if (!isValid) {
+        //     return res.json('wrong userid')
+        // }
         const err = validationResult(req);
         if(!err.isEmpty()){
             return res.status(403).json(err.array())
         }
         const {name, job, email, password} = req.body;
-        const user = await User.findByIdAndUpdate({_id: req.params.userid},{name, job, email, password});
+        const user = await User.findOneAndUpdate({_id: req.user.id},{name, job, email, password});
         if (!user) {
             return res.status(404).json('not found such user')
          }
@@ -65,11 +65,11 @@ module.exports = new class UserController {
     }
 
     async deleteUser (req,  res){
-        const isValid = mongoose.isValidObjectId(req.params.userid);
-        if (!isValid) {
-            return res.json('wrong userid')
-        }
-        const user = await User.findByIdAndDelete(req.params.userid);
+        // const isValid = mongoose.isValidObjectId(req.user.id);
+        // if (!isValid) {
+        //     return res.json('wrong userid')
+        // }
+        const user = await User.findByIdAndDelete(req.user.id);
         if (!user) {
             return res.status(404).json('not found such user')
          }
