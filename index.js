@@ -25,7 +25,7 @@ app.use(cors());
 app.use('/api/user', userRouter);
 app.use('/api/user/content', contentRouter);
 
-const PORT = 4000 ;
+const PORT = 8800 ;
 app.listen(PORT, ()=>{
     console.log(`listening on port ${PORT}`);
 });

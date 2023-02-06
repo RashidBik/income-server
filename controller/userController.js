@@ -2,25 +2,21 @@ const User = require('../model/income');
 const {validationResult} = require('express-validator');
 const { default: mongoose } = require('mongoose');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 
 module.exports = new class UserController {
-    constructor() {
-        
-    }
+    constructor() {}
+
     async login(req, res){
         const {email, password} = req.body;
-        const user = await User.findById(req.params.userid);
+        const user = await User.find({email: email });
         if (!user) {
             return res.status(404).json('not found such user')
+        } else {
+             console.log(user[0]);
+             const token = jwt.sign({ user: user._id, email: user[0].email }, 'ACCESS_KEY');
+             await res.json({token})
          }
-
-         bcrypt.compare(password, user.password, async function(err, result) {
-          if (!err) {
-            const token = jwt.sign({ id: user._id, user: user.name }, 'ACCESS_KEY');
-            res.json(token)
-          }
-        });
     }
 
     async getOneUser (req,  res){
@@ -33,26 +29,22 @@ module.exports = new class UserController {
         if (!user) {
             return res.status(404).json('not found such user')
          }
-        res.json({user})
+        res.status(200).json({user})
     }
 
     async createUser (req,  res){
         const err = validationResult(req);
         if(!err.isEmpty()){
-            return res.status(403).json({data: null, msg: err.array()})
+            return res.status(403).json(err.array())
         }
         const {name, job, email, password} = req.body;
-        
-        bcrypt.hash(password, 10, async function(err, hash) {
-            if (!err) {
-                const user = await new User({name, job, email, password: hash});
-                user.save(()=> console.log('sucessfuly created'));
-                res.status(200).json({data: user._id});
-            } else return res.json(err)
-        });
-
-      
-      
+        const user = await new User({name, job, email, password});
+            if (user) {
+                await user.save();
+                res.status(200).json('successfully registerd');      
+            } else {
+               await res.status(404).json('user not found');      
+            }
     }
 
     async updateUser (req,  res){
@@ -62,14 +54,14 @@ module.exports = new class UserController {
         }
         const err = validationResult(req);
         if(!err.isEmpty()){
-            return res.status(403).json({data: null, msg: err.array()})
+            return res.status(403).json(err.array())
         }
         const {name, job, email, password} = req.body;
         const user = await User.findByIdAndUpdate({_id: req.params.userid},{name, job, email, password});
         if (!user) {
             return res.status(404).json('not found such user')
          }
-        await res.status(200).json({data: user});
+        await res.status(200).json(user);
     }
 
     async deleteUser (req,  res){
@@ -81,7 +73,7 @@ module.exports = new class UserController {
         if (!user) {
             return res.status(404).json('not found such user')
          }
-        res.json({msg: "deleted succesfully"})
+        res.json( "deleted succesfully")
     }
 
 }
