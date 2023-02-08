@@ -2,12 +2,10 @@ const express = require('express');
 const contentRouter = require('./routes/content');
 const userRouter = require('./routes/user');
 const config = require('./config');
-const cors = require('cors');
-// const config = require('config');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const mongoose = require('mongoose');
-// const { config } = require('dotenv');
 mongoose.set('strictQuery', false);
 mongoose.connect(config[1])
 .then(()=> console.log('connected to DB'))
@@ -23,7 +21,7 @@ app.use(cors());
 // })
 
 app.use('/api/user', userRouter);
-app.use('/api/user/content', contentRouter);
+app.use('/api/content', contentRouter);
 
 const PORT = 8800 ;
 app.listen(PORT, ()=>{
